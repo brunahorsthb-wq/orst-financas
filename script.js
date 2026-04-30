@@ -1,5 +1,25 @@
 // CONFIGURAÇÃO DO FIREBASE (Substitua pelos seus dados do Console Firebase)
+const firebaseConfig = { // Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
+  apiKey: "AIzaSyDpYoAcRC_TfI87wbWzfug3KOxa0EOdHZ0",
+  authDomain: "orst-gestao.firebaseapp.com",
+  projectId: "orst-gestao",
+  storageBucket: "orst-gestao.firebasestorage.app",
+  messagingSenderId: "237695688518",
+  appId: "1:237695688518:web:c42a9fbae193900e280f47",
+  measurementId: "G-LRLR5HC4SZ"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
   apiKey: "SUA_API_KEY",
   authDomain: "seu-projeto.firebaseapp.com",
   projectId: "seu-projeto",
