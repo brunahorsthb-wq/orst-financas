@@ -57,3 +57,26 @@ window.salvarDespesa = async (nome, valor, parcelas, data, categoria) => {
         alert("Erro ao salvar.");
     }
 };
+// Função para sair
+window.logout = () => {
+    signOut(auth).then(() => {
+        window.location.href = "login.html";
+    });
+};
+
+// Observador de Login (O Porteiro)
+onAuthStateChanged(auth, (user) => {
+    const paginaAtual = window.location.pathname.split("/").pop();
+    
+    if (!user) {
+        // Se não houver ninguém logado, manda para o login
+        if (paginaAtual !== "login.html" && paginaAtual !== "") {
+            window.location.href = "login.html";
+        }
+    } else {
+        // Se já estiver logado e tentar abrir o login, volta para o app
+        if (paginaAtual === "login.html") {
+            window.location.href = "index.html";
+        }
+    }
+});
