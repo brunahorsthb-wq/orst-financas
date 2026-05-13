@@ -2,49 +2,26 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
-    <title>Login - ORST Finanças</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - ORST</title>
     <style>
-        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background: #f0f2f5; margin: 0; }
-        .card { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 90%; max-width: 350px; text-align: center; }
-        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 16px; }
-        button { width: 100%; padding: 12px; background: #28a745; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold; }
-        .toggle { margin-top: 15px; font-size: 0.9rem; color: #007bff; cursor: pointer; }
+        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background: #f4f4f4; margin: 0; }
+        .box { background: white; padding: 30px; border-radius: 10px; box-shadow: 0px 0px 10px rgba(0,0,0,0.1); width: 300px; text-align: center; }
+        input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+        button { width: 100%; padding: 10px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
 
-<div class="card">
-    <h2 id="titulo">Login</h2>
+<div class="box">
+    <h2>Login ORST</h2>
     <input type="email" id="email" placeholder="E-mail">
-    <input type="password" id="password" placeholder="Senha">
-    <button id="btn-acao">Entrar</button>
-    <div class="toggle" id="link-alternar">Não tem conta? Cadastre-se</div>
+    <input type="password" id="pass" placeholder="Senha">
+    <button onclick="fazerLogin(document.getElementById('email').value, document.getElementById('pass').value)">Entrar</button>
+    <p style="font-size: 12px; margin-top: 15px; color: #666;">Se não tiver conta, use o e-mail cadastrado no Firebase.</p>
 </div>
 
 <script type="module" src="script.js"></script>
-
-<script>
-    // Espera o script.js carregar as funções no window
-    document.getElementById('btn-acao').onclick = () => {
-        const e = document.getElementById('email').value;
-        const p = document.getElementById('password').value;
-        if (window.fazerLogin) {
-            window.fazerLogin(e, p);
-        } else {
-            alert("O sistema ainda está carregando... aguarde 2 segundos.");
-        }
-    };
-
-    // Alternar visual básico
-    let modoLogin = true;
-    document.getElementById('link-alternar').onclick = () => {
-        modoLogin = !modoLogin;
-        document.getElementById('titulo').innerText = modoLogin ? 'Login' : 'Cadastro';
-        document.getElementById('btn-acao').innerText = modoLogin ? 'Entrar' : 'Criar Conta';
-        document.getElementById('link-alternar').innerText = modoLogin ? 'Não tem conta? Cadastre-se' : 'Já tem conta? Login';
-    };
-</script>
 
 </body>
 </html>
