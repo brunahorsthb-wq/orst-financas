@@ -3,63 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>Entrar - ORST Finanças</title>
+    <title>Login - ORST Finanças</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background: #f0f2f5; margin: 0; }
-        .card { background: white; padding: 2.5rem; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.1); width: 100%; max-width: 320px; text-align: center; }
-        h2 { color: #333; margin-bottom: 1.5rem; }
-        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 16px; }
-        button { width: 100%; padding: 12px; background: #28a745; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold; transition: 0.3s; margin-top: 10px; }
-        button:hover { background: #218838; }
-        .toggle { margin-top: 20px; font-size: 0.9rem; cursor: pointer; color: #007bff; text-decoration: underline; }
+        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background: #f0f2f5; margin: 0; }
+        .card { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 90%; max-width: 350px; text-align: center; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 16px; }
+        button { width: 100%; padding: 12px; background: #28a745; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold; }
+        .toggle { margin-top: 15px; font-size: 0.9rem; color: #007bff; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <h2 id="titulo">Bem-vindo</h2>
-    <input type="email" id="email" placeholder="Seu E-mail">
-    <input type="password" id="password" placeholder="Sua Senha">
-    
+    <h2 id="titulo">Login</h2>
+    <input type="email" id="email" placeholder="E-mail">
+    <input type="password" id="password" placeholder="Senha">
     <button id="btn-acao">Entrar</button>
-    
     <div class="toggle" id="link-alternar">Não tem conta? Cadastre-se</div>
 </div>
-
-<script type="module">
-    import { fazerLogin } from './script.js'; 
-    // Nota: O script.js precisa exportar a função ou estar no mesmo escopo. 
-    // Como usamos o padrão window.fazerLogin no passo anterior, vamos apenas carregar o script:
-</script>
 
 <script type="module" src="script.js"></script>
 
 <script>
-    // Lógica visual de alternar entre Login e Cadastro
-    let modoLogin = true;
-    const btn = document.getElementById('btn-acao');
-    const titulo = document.getElementById('titulo');
-    const link = document.getElementById('link-alternar');
-
-    link.onclick = () => {
-        modoLogin = !modoLogin;
-        titulo.innerText = modoLogin ? 'Login' : 'Cadastro';
-        btn.innerText = modoLogin ? 'Entrar' : 'Criar Conta';
-        link.innerText = modoLogin ? 'Não tem conta? Cadastre-se' : 'Já tem conta? Faça Login';
+    // Espera o script.js carregar as funções no window
+    document.getElementById('btn-acao').onclick = () => {
+        const e = document.getElementById('email').value;
+        const p = document.getElementById('password').value;
+        if (window.fazerLogin) {
+            window.fazerLogin(e, p);
+        } else {
+            alert("O sistema ainda está carregando... aguarde 2 segundos.");
+        }
     };
 
-    btn.onclick = () => {
-        const email = document.getElementById('email').value;
-        const pass = document.getElementById('password').value;
-        
-        if (modoLogin) {
-            window.fazerLogin(email, pass);
-        } else {
-            // Se você quiser a função de criar conta, ela precisa estar no script.js
-            alert("Use a função de cadastro do seu script principal!");
-        }
+    // Alternar visual básico
+    let modoLogin = true;
+    document.getElementById('link-alternar').onclick = () => {
+        modoLogin = !modoLogin;
+        document.getElementById('titulo').innerText = modoLogin ? 'Login' : 'Cadastro';
+        document.getElementById('btn-acao').innerText = modoLogin ? 'Entrar' : 'Criar Conta';
+        document.getElementById('link-alternar').innerText = modoLogin ? 'Não tem conta? Cadastre-se' : 'Já tem conta? Login';
     };
 </script>
 
