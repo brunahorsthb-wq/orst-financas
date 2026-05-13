@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getFirestore, doc, getDoc, addDoc, collection } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getFirestore, addDoc, collection } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBsbhLaj1_LsAkETAhzEHM5KIJWB-7Zjkw",
@@ -15,36 +15,30 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// Proteção para não travar a página
+// Apenas observa o usuário, sem travar a tela
 onAuthStateChanged(auth, (user) => {
-    const path = window.location.pathname;
-    const paginaAtual = path.split("/").pop();
-
-    if (!user) {
-        if (paginaAtual !== "login.html" && paginaAtual !== "") {
-            window.location.href = "login.html";
-        }
+    if (user) {
+        console.log("Usuário logado:", user.email);
     } else {
-        if (paginaAtual === "login.html") {
-            window.location.href = "index.html";
-        }
+        console.log("Nenhum usuário logado.");
     }
 });
 
-// Funções globais para os botões do HTML funcionarem
+// Função de Login simples
 window.fazerLogin = async (email, senha) => {
     try {
         await signInWithEmailAndPassword(auth, email, senha);
         window.location.href = "index.html";
     } catch (error) {
-        alert("E-mail ou senha incorretos!");
-        console.error(error);
+        alert("Erro: " + error.message);
     }
 };
 
+// Sua função de lançamentos que já funcionava
 window.salvarDespesa = async (nome, valor, parcelas, data, categoria) => {
     const user = auth.currentUser;
-    if (!user) return alert("Logue novamente");
+    if (!user) return alert("Por favor, faça login primeiro!");
+
     try {
         const p = parseInt(parcelas) || 1;
         const v = parseFloat(valor) / p;
@@ -54,11 +48,12 @@ window.salvarDespesa = async (nome, valor, parcelas, data, categoria) => {
                 valor: v,
                 data: data,
                 usuarioId: user.uid,
-                status: "pendente"
+                status: "pendente",
+                categoria: categoria
             });
         }
-        alert("Salvo!");
+        alert("Lançamento realizado!");
     } catch (e) {
-        alert("Erro ao salvar");
+        alert("Erro ao salvar.");
     }
 };
