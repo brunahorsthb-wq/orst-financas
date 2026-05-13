@@ -1,15 +1,3 @@
-// Esconde o conteúdo da página até verificar o login
-document.body.style.display = "none";
-
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    // Se está logado, mostra a página
-    document.body.style.display = "block";
-  } else {
-    // Se não está logado, manda para o login imediatamente
-    window.location.href = "login.html";
-  }
-});
 // 1. Importações dos módulos do Firebase
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
@@ -24,7 +12,18 @@ const firebaseConfig = {
   messagingSenderId: "26142326621",
   appId: "1:26142326621:web:c1fd54a75aecdb3ae7b2b4"
 };
+// Esconde o conteúdo da página até verificar o login
+document.body.style.display = "none";
 
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    // Se está logado, mostra a página
+    document.body.style.display = "block";
+  } else {
+    // Se não está logado, manda para o login imediatamente
+    window.location.href = "login.html";
+  }
+});
 // 3. Inicialização
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
