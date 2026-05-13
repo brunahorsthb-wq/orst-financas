@@ -1,4 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { getFirestore, addDoc, collection } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -11,10 +12,33 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
 const db = getFirestore(app);
 
-// Função simples de salvar que você disse que funcionava
+// Apenas observa o usuário, sem travar a tela
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        console.log("Usuário logado:", user.email);
+    } else {
+        console.log("Nenhum usuário logado.");
+    }
+});
+
+// Função de Login simples
+window.fazerLogin = async (email, senha) => {
+    try {
+        await signInWithEmailAndPassword(auth, email, senha);
+        window.location.href = "index.html";
+    } catch (error) {
+        alert("Erro: " + error.message);
+    }
+};
+
+// Sua função de lançamentos que já funcionava
 window.salvarDespesa = async (nome, valor, parcelas, data, categoria) => {
+    const user = auth.currentUser;
+    if (!user) return alert("Por favor, faça login primeiro!");
+
     try {
         const p = parseInt(parcelas) || 1;
         const v = parseFloat(valor) / p;
@@ -23,14 +47,13 @@ window.salvarDespesa = async (nome, valor, parcelas, data, categoria) => {
                 descricao: `${nome} ${i}/${p}`,
                 valor: v,
                 data: data,
+                usuarioId: user.uid,
                 status: "pendente",
-                categoria: categoria,
-                createdAt: new Date()
+                categoria: categoria
             });
         }
-        alert("Lançamento realizado com sucesso!");
+        alert("Lançamento realizado!");
     } catch (e) {
-        console.error(e);
-        alert("Erro ao salvar. Verifique o console.");
+        alert("Erro ao salvar.");
     }
 };
