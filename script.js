@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { getFirestore, addDoc, collection } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -15,30 +15,47 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// Apenas observa o usuário, sem travar a tela
+// MONITOR DE LOGIN (O CHEFE)
 onAuthStateChanged(auth, (user) => {
-    if (user) {
-        console.log("Usuário logado:", user.email);
+    const paginaAtual = window.location.pathname.split("/").pop();
+
+    if (!user) {
+        // Se NÃO tem usuário e NÃO está no login, vai para o login
+        if (paginaAtual !== "login.html" && paginaAtual !== "") {
+            window.location.href = "login.html";
+        }
     } else {
-        console.log("Nenhum usuário logado.");
+        // Se TEM usuário, mostra a página (remove a trava que colocamos no HTML)
+        document.documentElement.style.display = 'block';
+        
+        // Se estiver no login mas já logado, vai para o index
+        if (paginaAtual === "login.html") {
+            window.location.href = "index.html";
+        }
     }
 });
 
-// Função de Login simples
+// FUNÇÃO DE LOGIN
 window.fazerLogin = async (email, senha) => {
     try {
         await signInWithEmailAndPassword(auth, email, senha);
         window.location.href = "index.html";
     } catch (error) {
-        alert("Erro: " + error.message);
+        alert("E-mail ou senha inválidos!");
     }
 };
 
-// Sua função de lançamentos que já funcionava
+// FUNÇÃO PARA SAIR
+window.logout = () => {
+    signOut(auth).then(() => {
+        window.location.href = "login.html";
+    });
+};
+
+// FUNÇÃO DE LANÇAMENTOS
 window.salvarDespesa = async (nome, valor, parcelas, data, categoria) => {
     const user = auth.currentUser;
-    if (!user) return alert("Por favor, faça login primeiro!");
-
+    if (!user) return;
     try {
         const p = parseInt(parcelas) || 1;
         const v = parseFloat(valor) / p;
@@ -52,31 +69,8 @@ window.salvarDespesa = async (nome, valor, parcelas, data, categoria) => {
                 categoria: categoria
             });
         }
-        alert("Lançamento realizado!");
+        alert("Salvo com sucesso!");
     } catch (e) {
         alert("Erro ao salvar.");
     }
 };
-// Função para sair
-window.logout = () => {
-    signOut(auth).then(() => {
-        window.location.href = "login.html";
-    });
-};
-
-// Observador de Login (O Porteiro)
-onAuthStateChanged(auth, (user) => {
-    const paginaAtual = window.location.pathname.split("/").pop();
-    
-    if (!user) {
-        // Se não houver ninguém logado, manda para o login
-        if (paginaAtual !== "login.html" && paginaAtual !== "") {
-            window.location.href = "login.html";
-        }
-    } else {
-        // Se já estiver logado e tentar abrir o login, volta para o app
-        if (paginaAtual === "login.html") {
-            window.location.href = "index.html";
-        }
-    }
-});
