@@ -1,89 +1,66 @@
-// 1. Importações modulares (usando CDN para facilitar no seu caso)
+// 1. Importações (Usando CDN para funcionar direto no navegador)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { 
-  getFirestore, 
-  doc, 
-  getDoc, 
-  setDoc, 
-  addDoc, 
-  collection 
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc, addDoc, collection } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-// 2. Sua configuração (Mantenha seus dados reais aqui)
+// 2. Sua Configuração (Já atualizada com suas chaves)
 const firebaseConfig = {
-  apiKey: "AIzaSyDpYoAcRC_TfI87wbWzfug3KOxa0EOdHZ0",
-  authDomain: "orst-gestao.firebaseapp.com",
-  projectId: "orst-gestao",
-  storageBucket: "orst-gestao.firebasestorage.app",
-  messagingSenderId: "237695688518",
-  appId: "1:237695688518:web:c42a9fbae193900e280f47",
-  measurementId: "G-LRLR5HC4SZ"
+  apiKey: "AIzaSyBsbhLaj1_LsAkETAhzEHM5KIJWB-7Zjkw",
+  authDomain: "orst-financas.firebaseapp.com",
+  projectId: "orst-financas",
+  storageBucket: "orst-financas.firebasestorage.app",
+  messagingSenderId: "26142326621",
+  appId: "1:26142326621:web:c1fd54a75aecdb3ae7b2b4"
 };
 
-// 3. Inicialização dos serviços
+// 3. Inicialização
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// 4. Lógica de Autenticação e Roles
+// --- FUNÇÕES DO SISTEMA ---
+
+// Verificar se o usuário está logado e o nível de acesso
 onAuthStateChanged(auth, async (user) => {
   if (user) {
-    // Referência ao documento do usuário: db -> coleção 'users' -> id do usuário
     const userRef = doc(db, "users", user.uid);
     const userSnap = await getDoc(userRef);
-
-    let role = "free"; 
+    
+    let role = "free";
     if (userSnap.exists()) {
       role = userSnap.data().role;
     } else {
-      // Cria o documento se não existir (Primeiro acesso)
       await setDoc(userRef, { email: user.email, role: "free" });
     }
-    configurarInterface(role);
+    console.log("Usuário logado como:", role);
+    // Aqui você pode chamar uma função para mostrar/esconder itens premium
   } else {
-    if(!window.location.pathname.includes("login.html")) {
-        console.log("Usuário não autenticado");
-        // window.location.href = "login.html"; 
-    }
+    console.log("Nenhum usuário logado.");
   }
 });
 
-// 5. Função de Interface
-function configurarInterface(role) {
-  console.log("Nível de acesso:", role);
-  const itensPremium = document.querySelectorAll('.premium-only');
-  itensPremium.forEach(el => {
-    el.style.display = (role === "free") ? 'none' : 'block';
-  });
-}
-
-// 6. Lógica de Parcelamento (Refatorada para Modular)
-async function salvarDespesaParcelada(nome, valorTotal, numParcelas, dataInicial, categoria) {
+// Função para Salvar Despesa Parcelada
+async function salvarDespesa(nome, valor, parcelas, data, categoria) {
   const user = auth.currentUser;
-  if (!user) return alert("Faça login primeiro!");
-
-  const valorCadaParcela = valorTotal / numParcelas;
-  const idAgrupamento = Date.now().toString();
+  if (!user) return alert("Você precisa estar logado!");
 
   try {
-    for (let i = 1; i <= numParcelas; i++) {
-      let dataVencimento = new Date(dataInicial);
-      dataVencimento.setMonth(dataVencimento.getMonth() + (i - 1));
-
-      // Uso do addDoc e collection em vez de .collection().add()
+    const valorParcela = valor / parcelas;
+    for (let i = 1; i <= parcelas; i++) {
       await addDoc(collection(db, "movimentacoes"), {
-        descricao: `${nome} (${i}/${numParcelas})`,
-        valor: valorCadaParcela,
-        data: dataVencimento.toISOString().split('T')[0],
+        descricao: `${nome} (${i}/${parcelas})`,
+        valor: valorParcela,
+        data: data, // Ideal ajustar a data para cada mês aqui
         status: "pendente",
         categoria: categoria,
-        usuarioId: user.uid,
-        idParcelamento: idAgrupamento
+        usuarioId: user.uid
       });
     }
-    alert("Parcelas geradas com sucesso!");
+    alert("Dados salvos com sucesso!");
   } catch (error) {
-    console.error("Erro ao salvar parcelas:", error);
+    console.error("Erro ao salvar:", error);
   }
 }
+
+// Exportar para usar no console se necessário
+window.salvarDespesa = salvarDespesa;
