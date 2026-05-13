@@ -1,12 +1,16 @@
-// CONFIGURAÇÃO DO FIREBASE (Substitua pelos seus dados do Console Firebase)
-const firebaseConfig = { // Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+// 1. Importações modulares (usando CDN para facilitar no seu caso)
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { 
+  getFirestore, 
+  doc, 
+  getDoc, 
+  setDoc, 
+  addDoc, 
+  collection 
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+// 2. Sua configuração (Mantenha seus dados reais aqui)
 const firebaseConfig = {
   apiKey: "AIzaSyDpYoAcRC_TfI87wbWzfug3KOxa0EOdHZ0",
   authDomain: "orst-gestao.firebaseapp.com",
@@ -17,72 +21,69 @@ const firebaseConfig = {
   measurementId: "G-LRLR5HC4SZ"
 };
 
-// Initialize Firebase
+// 3. Inicialização dos serviços
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-  apiKey: "SUA_API_KEY",
-  authDomain: "seu-projeto.firebaseapp.com",
-  projectId: "seu-projeto",
-  storageBucket: "seu-projeto.appspot.com",
-  messagingSenderId: "seu-id",
-  appId: "seu-app-id"
-};
+const auth = getAuth(app);
+const db = getFirestore(app);
 
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
-
-// 1. CONTROLE DE AUTENTICAÇÃO E NÍVEIS (ROLES)
-auth.onAuthStateChanged(user => {
+// 4. Lógica de Autenticação e Roles
+onAuthStateChanged(auth, async (user) => {
   if (user) {
-    db.collection("users").doc(user.uid).get().then(doc => {
-      let role = "free"; 
-      if (doc.exists) {
-        role = doc.data().role;
-      } else {
-        db.collection("users").doc(user.uid).set({ email: user.email, role: "free" });
-      }
-      configurarInterface(role);
-    });
+    // Referência ao documento do usuário: db -> coleção 'users' -> id do usuário
+    const userRef = doc(db, "users", user.uid);
+    const userSnap = await getDoc(userRef);
+
+    let role = "free"; 
+    if (userSnap.exists()) {
+      role = userSnap.data().role;
+    } else {
+      // Cria o documento se não existir (Primeiro acesso)
+      await setDoc(userRef, { email: user.email, role: "free" });
+    }
+    configurarInterface(role);
   } else {
-    // Se não estiver na página de login e não estiver logado, redireciona
     if(!window.location.pathname.includes("login.html")) {
         console.log("Usuário não autenticado");
-        // window.location.href = "login.html"; // Descomente quando criar o login.html
+        // window.location.href = "login.html"; 
     }
   }
 });
 
+// 5. Função de Interface
 function configurarInterface(role) {
   console.log("Nível de acesso:", role);
-  if (role === "free") {
-    // Esconde Investimentos e Metas para usuários Free
-    const itensPremium = document.querySelectorAll('.premium-only');
-    itensPremium.forEach(el => el.style.display = 'none');
-  }
+  const itensPremium = document.querySelectorAll('.premium-only');
+  itensPremium.forEach(el => {
+    el.style.display = (role === "free") ? 'none' : 'block';
+  });
 }
 
-// 2. LÓGICA DE CONTAS PARCELADAS
+// 6. Lógica de Parcelamento (Refatorada para Modular)
 async function salvarDespesaParcelada(nome, valorTotal, numParcelas, dataInicial, categoria) {
   const user = auth.currentUser;
   if (!user) return alert("Faça login primeiro!");
 
   const valorCadaParcela = valorTotal / numParcelas;
-  const idAgrupamento = Date.now().toString(); // ID para identificar o grupo de parcelas
+  const idAgrupamento = Date.now().toString();
 
-  for (let i = 1; i <= numParcelas; i++) {
-    let dataVencimento = new Date(dataInicial);
-    dataVencimento.setMonth(dataVencimento.getMonth() + (i - 1));
+  try {
+    for (let i = 1; i <= numParcelas; i++) {
+      let dataVencimento = new Date(dataInicial);
+      dataVencimento.setMonth(dataVencimento.getMonth() + (i - 1));
 
-    await db.collection("movimentacoes").add({
-      descricao: `${nome} (${i}/${numParcelas})`,
-      valor: valorCadaParcela,
-      data: dataVencimento.toISOString().split('T')[0],
-      status: "pendente",
-      categoria: categoria,
-      usuarioId: user.uid,
-      idParcelamento: idAgrupamento
-    });
+      // Uso do addDoc e collection em vez de .collection().add()
+      await addDoc(collection(db, "movimentacoes"), {
+        descricao: `${nome} (${i}/${numParcelas})`,
+        valor: valorCadaParcela,
+        data: dataVencimento.toISOString().split('T')[0],
+        status: "pendente",
+        categoria: categoria,
+        usuarioId: user.uid,
+        idParcelamento: idAgrupamento
+      });
+    }
+    alert("Parcelas geradas com sucesso!");
+  } catch (error) {
+    console.error("Erro ao salvar parcelas:", error);
   }
-  alert("Parcelas geradas com sucesso!");
 }
