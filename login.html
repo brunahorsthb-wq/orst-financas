@@ -2,72 +2,66 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - ORST Gestão</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>Entrar - ORST Finanças</title>
     <style>
-        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background: #f0f2f5; }
-        .card { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 100%; max-width: 350px; }
-        input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
-        button { width: 100%; padding: 10px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background: #f0f2f5; margin: 0; }
+        .card { background: white; padding: 2.5rem; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.1); width: 100%; max-width: 320px; text-align: center; }
+        h2 { color: #333; margin-bottom: 1.5rem; }
+        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 16px; }
+        button { width: 100%; padding: 12px; background: #28a745; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold; transition: 0.3s; margin-top: 10px; }
         button:hover { background: #218838; }
-        .toggle { text-align: center; margin-top: 15px; font-size: 0.9rem; cursor: pointer; color: blue; }
+        .toggle { margin-top: 20px; font-size: 0.9rem; cursor: pointer; color: #007bff; text-decoration: underline; }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <h2 id="titulo">Login</h2>
+    <h2 id="titulo">Bem-vindo</h2>
     <input type="email" id="email" placeholder="Seu E-mail">
     <input type="password" id="password" placeholder="Sua Senha">
-    <button onclick="executarAcao()" id="btn-acao">Entrar</button>
-    <div class="toggle" onclick="alternarTela()" id="link-alternar">Não tem conta? Cadastre-se</div>
+    
+    <button id="btn-acao">Entrar</button>
+    
+    <div class="toggle" id="link-alternar">Não tem conta? Cadastre-se</div>
 </div>
 
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script type="module">
+    import { fazerLogin } from './script.js'; 
+    // Nota: O script.js precisa exportar a função ou estar no mesmo escopo. 
+    // Como usamos o padrão window.fazerLogin no passo anterior, vamos apenas carregar o script:
+</script>
+
+<script type="module" src="script.js"></script>
 
 <script>
-    // ⚠️ COPIE E COLE AS SUAS CHAVES DO FIREBASE AQUI ABAIXO
-    const firebaseConfig = {
-        apiKey: "SUA_API_KEY",
-        authDomain: "seu-projeto.firebaseapp.com",
-        projectId: "seu-projeto",
-        storageBucket: "seu-projeto.appspot.com",
-        messagingSenderId: "seu-id",
-        appId: "seu-app-id"
-    };
-    firebase.initializeApp(firebaseConfig);
-
+    // Lógica visual de alternar entre Login e Cadastro
     let modoLogin = true;
+    const btn = document.getElementById('btn-acao');
+    const titulo = document.getElementById('titulo');
+    const link = document.getElementById('link-alternar');
 
-    function alternarTela() {
+    link.onclick = () => {
         modoLogin = !modoLogin;
-        document.getElementById('titulo').innerText = modoLogin ? 'Login' : 'Cadastro';
-        document.getElementById('btn-acao').innerText = modoLogin ? 'Entrar' : 'Criar Conta';
-        document.getElementById('link-alternar').innerText = modoLogin ? 'Não tem conta? Cadastre-se' : 'Já tem conta? Faça Login';
-    }
+        titulo.innerText = modoLogin ? 'Login' : 'Cadastro';
+        btn.innerText = modoLogin ? 'Entrar' : 'Criar Conta';
+        link.innerText = modoLogin ? 'Não tem conta? Cadastre-se' : 'Já tem conta? Faça Login';
+    };
 
-    function executarAcao() {
+    btn.onclick = () => {
         const email = document.getElementById('email').value;
-        const password = document.getElementById('password').value;
-
+        const pass = document.getElementById('password').value;
+        
         if (modoLogin) {
-            firebase.auth().signInWithEmailAndPassword(email, password)
-                .then(() => window.location.href = "index.html")
-                .catch(err => alert("Erro ao logar: " + err.message));
+            window.fazerLogin(email, pass);
         } else {
-            firebase.auth().createUserWithEmailAndPassword(email, password)
-                .then((res) => {
-                    // Ao criar a conta, define o nível como 'free' no banco de dados
-                    firebase.firestore().collection("users").doc(res.user.uid).set({
-                        email: email,
-                        role: 'free'
-                    }).then(() => window.location.href = "index.html");
-                })
-                .catch(err => alert("Erro ao cadastrar: " + err.message));
+            // Se você quiser a função de criar conta, ela precisa estar no script.js
+            alert("Use a função de cadastro do seu script principal!");
         }
-    }
+    };
 </script>
+
 </body>
 </html>
