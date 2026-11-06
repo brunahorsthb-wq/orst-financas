@@ -1,6 +1,6 @@
 // ORST Financas — Service Worker
 // Ao publicar uma versao nova, troque o numero abaixo (v2, v3...) para os celulares atualizarem.
-var CACHE = 'orst-financas-v4';
+var CACHE = 'orst-financas-v5';
 var BASE = self.registration.scope; // funciona com qualquer nome de repositorio
 var ASSETS = ['', 'index.html', 'manifest.json', 'firebase-config.js', 'icon-192.png', 'icon-512.png']
   .map(function(p) { return BASE + p; });
